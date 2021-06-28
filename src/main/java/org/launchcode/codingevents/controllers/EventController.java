@@ -33,12 +33,13 @@ public class EventController {
     private TagRepository tagRepository;
 
     @GetMapping
-    public String displayEvents(@RequestParam(required = false) Integer categoryId, Model model) {
+    public String displayEvents(@RequestParam(required = false) Integer categoryId, Model model, @RequestParam(required = false) Integer tagId) {
 
-        if (categoryId == null) {
+        if (categoryId == null && tagId==null) {
             model.addAttribute("title", "All Events");
             model.addAttribute("events", eventRepository.findAll());
-        } else {
+            //model.addAttribute("tags", tagRepository.findAll());
+        } else if(categoryId != null && tagId ==null) {
             Optional<EventCategory> result = eventCategoryRepository.findById(categoryId);
             if (result.isEmpty()) {
                 model.addAttribute("title", "Invalid Category ID: " + categoryId);
@@ -46,6 +47,16 @@ public class EventController {
                 EventCategory category = result.get();
                 model.addAttribute("title", "Events in category: " + category.getName());
                 model.addAttribute("events", category.getEvents());
+            }
+        }
+            else if (categoryId == null && tagId != null){
+            Optional<Tag> tagResult = tagRepository.findById(tagId);
+            if (tagResult.isEmpty()){
+                model.addAttribute("title", "Invalid Tag Id: " + tagId);
+            } else{
+                Tag tag = tagResult.get();
+                model.addAttribute("title", "Events with this tag: " + tag.getDisplayName());
+                model.addAttribute("events", tag.getEvents());
             }
         }
 
